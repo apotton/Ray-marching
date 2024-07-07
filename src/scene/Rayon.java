@@ -101,10 +101,17 @@ public class Rayon {
         this.setColor(r, g, b);
     }
 
+    /**
+     * Réfléchit un rayon incident par rapport à la normale
+     * 
+     * @param norm La normale à l'objet touché
+     * @return Le vecteur réfléchi
+     */
     public Vector3D reflexion(Vector3D norm) {
-        // Construction du vecteur incident
+        // Construction du vecteur incident (de l'objet vers l'origine)
         Vector3D incident = Vector3D.difference(this.position, this.origine);
 
+        // Réflexion du vecteur incident
         return incident.reflexion(norm);
     }
 

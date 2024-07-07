@@ -4,24 +4,16 @@ package scene;
  * Classe régissant le comportement des vecteurs de l'espace à trois coordonnées
  */
 public class Vector3D {
-    /**
-     * L'abscisse
-     */
+    /** L'abscisse */
     public double x;
 
-    /**
-     * L'ordonnée
-     */
+    /** L'ordonnée */
     public double y;
 
-    /**
-     * La hauteur
-     */
+    /** La hauteur */
     public double z;
 
-    /**
-     * Renvoie un nouveau vecteur de coordonnées nulles
-     */
+    /** Renvoie un nouveau vecteur de coordonnées nulles */
     public Vector3D() {
         x = 0;
         y = 0;
@@ -79,18 +71,10 @@ public class Vector3D {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
 
-    /***
-     * @return Un nouveau vecteur de norme unitaire
-     */
-    public Vector3D normaliser() {
-        double norme = this.norme();
-        return new Vector3D(this.x / norme, this.y / norme, this.z / norme);
-    }
-
     /**
      * Fixe la norme du vecteur à 1
      */
-    public void normaliserEnPlace() {
+    public void normaliser() {
         double norme = this.norme();
         this.x /= norme;
         this.y /= norme;
@@ -98,23 +82,11 @@ public class Vector3D {
     }
 
     /**
-     * @param norme La norme souhaitée
-     * @return Un nouveau vecteur ayant la bonne norme
-     */
-    public Vector3D normer(double norme) {
-        Vector3D ret = this.normaliser();
-        ret.x *= norme;
-        ret.y *= norme;
-        ret.z *= norme;
-        return ret;
-    }
-
-    /**
      * Donne au vecteur la norme choisie
      * 
      * @param norme
      */
-    public void normerEnPlace(double norme) {
+    public void normer(double norme) {
         double mult = this.norme();
         mult = norme / mult;
         this.x *= mult;
@@ -129,9 +101,11 @@ public class Vector3D {
      * @param origine  L'origine de la trajectoire
      */
     public void avancer(double distance, Vector3D origine) {
-        Vector3D avancement = new Vector3D(this.x - origine.x, this.y - origine.y, this.z - origine.z);
-        avancement.normaliserEnPlace();
+        // Calcul de la direction du rayon
+        Vector3D avancement = difference(origine, this);
+        avancement.normaliser();
 
+        // Ajout de la distance au vecteur d'origine
         this.x += avancement.x * distance;
         this.y += avancement.y * distance;
         this.z += avancement.z * distance;
@@ -142,12 +116,13 @@ public class Vector3D {
      * @return La distance entre le vecteur de base et point
      */
     public double distance(Vector3D point) {
-        return Math.sqrt(Math.pow(point.x - this.x, 2) + Math.pow(point.y - this.y, 2) + Math.pow(point.z - this.z, 2));
+        return Math.sqrt(Math.pow(point.x - this.x, 2) + Math.pow(point.y - this.y,
+                2) + Math.pow(point.z - this.z, 2));
     }
 
     /**
-     * @param a
-     * @param b
+     * @param a Premier vecteur
+     * @param b Deuxième vecteur
      * @return Le vecteur b-a, c'est à dire un vecteur allant de a vers b
      */
     static public Vector3D difference(Vector3D a, Vector3D b) {
@@ -168,31 +143,23 @@ public class Vector3D {
     }
 
     /**
+     * Réfléchit un vecteur selon un axe d'après la formule:
+     * s(x) = x - (x|axe)/|axe|² * axe
+     * 
      * @param axe L'axe de réflexion
      * @return Un vecteur normalisé correspondant à la réflexion du vecteur
      */
     public Vector3D reflexion(Vector3D axe) {
-        axe.normerEnPlace(2 * PS(this, axe) / Math.pow(axe.norme(), 2));
+        // Calcul de la composante de la formule
+        axe.normer(2 * PS(this, axe) / Math.pow(axe.norme(), 2));
 
+        // Calcul du vecteur réfléchi
         Vector3D ret = difference(this, axe);
 
-        ret.normerEnPlace(Scene.DISTANCE_MIN);
+        // Norme du vecteur à la distance minimale
+        ret.normer(Scene.DISTANCE_MIN);
 
         return ret;
-    }
-
-    /**
-     * @return La valeur absolue d'un vecteur, coordonnées par coordonnées
-     */
-    public Vector3D abs() {
-        return new Vector3D(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
-    }
-
-    /**
-     * @return Un vecteur où toutes les composantes sont >= 0
-     */
-    public Vector3D positives() {
-        return new Vector3D(Math.max(this.x, 0), Math.max(this.y, 0), Math.max(this.z, 0));
     }
 
     public String toString() {

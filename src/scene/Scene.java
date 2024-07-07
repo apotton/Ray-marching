@@ -13,7 +13,7 @@ public class Scene {
     static final int Z_SIZE = Main.Z_SIZE;
 
     public static final double DISTANCE_MAX = 10000;
-    public static final double DISTANCE_MIN = 0.00001;
+    public static final double DISTANCE_MIN = 0.001;
 
     /** Ensemble des rayons de lumière */
     public Rayon[] lumiere = new Rayon[X_SIZE * Z_SIZE];
@@ -81,12 +81,12 @@ public class Scene {
         this.objets.add(new Boite(new Vector3D(0, -100, 100), Color.CYAN, 400, 1, 300, false));
 
         // Murs droite et gauche
-        this.objets.add(new Boite(new Vector3D(-300, 300, -100), Color.RED, 1, 400, 300, false));
-        this.objets.add(new Boite(new Vector3D(300, 300, -100), new Color(0, 150, 0), 1, 400, 300, false));
+        this.objets.add(new Boite(new Vector3D(-300, 300, -100), Color.RED, 1, 700, 300, false));
+        this.objets.add(new Boite(new Vector3D(300, 300, -100), new Color(0, 150, 0), 1, 700, 300, false));
 
         // Plafond et plancher
-        this.objets.add(new Boite(new Vector3D(0, 300, 100), Color.BLUE, 300, 300, 2, false));
-        this.objets.add(new Boite(new Vector3D(0, 300, -50), Color.GRAY, 300, 300, 2, false));
+        this.objets.add(new Boite(new Vector3D(0, 300, 100), Color.BLUE, 300, 700, 2, false));
+        this.objets.add(new Boite(new Vector3D(0, 300, -50), Color.GRAY, 300, 700, 2, false));
 
     }
 
@@ -110,8 +110,7 @@ public class Scene {
     }
 
     /**
-     * La fonction modifie la couleur du rayon incident pour bien s'adapter à
-     * l'objet
+     * Calcule la distance à l'objet le plus proche
      * 
      * @param rayon Le rayon en question
      * @return La distance à l'objet le plus proche dans la scène
@@ -119,11 +118,11 @@ public class Scene {
     public double SDFScene(Rayon rayon) {
         double dist = DISTANCE_MAX;
 
+        // Boucle sur tous les objets
         for (Element objet : this.objets) {
             double temp = objet.SDF(rayon.position);
             if (dist > temp) {
                 dist = temp;
-                // rayon.couleur = objet.couleur;
             }
         }
 
@@ -131,17 +130,19 @@ public class Scene {
     }
 
     /**
-     * La fonction ne modifie pas la couleur de l'objet
+     * Calcule la distance au deuxième objet le plus proche
      * 
-     * @param rayon  Le rayon actuel
-     * @param objetP L'objet le plus proche
+     * @param rayon           Le rayon actuel
+     * @param objetPlusProche L'objet le plus proche
      * @return La distance au deuxième objet le plus proche
      */
-    public double SDFScene2(Rayon rayon, Element objetP) {
+    public double SDFScene2(Rayon rayon, Element objetPlusProche) {
         double dist = DISTANCE_MAX;
 
+        // Boucle sur tous les objets
         for (Element objet : this.objets) {
-            if (objet.equals(objetP)) {
+            // On saute l'objet le plus proche
+            if (objet.equals(objetPlusProche)) {
                 continue;
             }
             double temp = objet.SDF(rayon.position);
@@ -181,7 +182,7 @@ public class Scene {
     public double diffusionMultiplier(Vector3D norm, Vector3D position) {
         // Calcul du plus court chemin vers l'éclairage
         Vector3D diff = Vector3D.difference(position, this.eclairage.position);
-        diff.normaliserEnPlace();
+        diff.normaliser();
 
         // Le résultat est proportionnel au cosinus de l'angle entre la normale et le
         // vecteur vers l'éclairage. Si le cos est négatif, c'est qu'on est du mauvais
@@ -202,13 +203,13 @@ public class Scene {
     public void ajouterSpeculaire(Rayon rayon, Vector3D norm, double diffusion, double specular) {
         // Construction du rayon réfléchi
         Vector3D direction = Vector3D.difference(rayon.position, this.eclairage.position);
-        direction.normaliserEnPlace();
+        direction.normaliser();
         direction = direction.reflexion(norm);
-        direction.normaliserEnPlace();
+        direction.normaliser();
 
         // Construction du rayon du point vers la caméra
         Vector3D vision = Vector3D.difference(rayon.position, rayon.origine);
-        vision.normaliserEnPlace();
+        vision.normaliser();
 
         // Calcul de la proximité entre eux
         double coefficientMultiplicateur = Math.pow(Vector3D.PS(direction, vision), specular);
@@ -222,7 +223,7 @@ public class Scene {
      * @param objet         L'objet le plus proche
      * @return True si le point est à l'ombre, false sinon
      */
-    public boolean ombre(Rayon rayon_origine, Element objet) {
+    public boolean estALOmbre(Rayon rayon_origine, Element objet) {
         // L'éclairage n'est, par définition, pas vraiment à l'ombre
         if (objet.equals(this.eclairage)) {
             return false;
@@ -234,10 +235,10 @@ public class Scene {
         // L'origine est désormais sa position actuelle
         rayonTemp.origine = new Vector3D(rayonTemp.position);
 
-        // On fixe sa nouvelle position à DISTANCE_MIN de l'origine, dans la direction
-        // de la lumière
+        // On fixe sa nouvelle position à DISTANCE_MIN de l'origine,
+        // dans la direction de la lumière
         Vector3D nouvellePos = Vector3D.difference(rayonTemp.origine, eclairage.position);
-        nouvellePos.normerEnPlace(DISTANCE_MIN);
+        nouvellePos.normer(DISTANCE_MIN);
         nouvellePos.ajouter(rayonTemp.position);
         rayonTemp.position = nouvellePos;
 
@@ -250,6 +251,7 @@ public class Scene {
         while ((rayonTemp.position.distance(this.origine) < DISTANCE_MAX)
                 && ((dist > DISTANCE_MIN) || objetplusProche.equals(objet))) {
 
+            // Le rayon avance
             rayonTemp.avancer(Math.max(dist, DISTANCE_MIN));
 
             // Actualisation de l'objet plus proche
@@ -271,8 +273,8 @@ public class Scene {
             return false;
         }
 
-        // Sinon, on a tapé quelque chose qui nous bloque la lumière, et on est donc à
-        // l'ombre
+        // Sinon, on a tapé quelque chose qui nous bloque la lumière,
+        // et on est donc à l'ombre
         return true;
     }
 
@@ -291,7 +293,7 @@ public class Scene {
         double diffusion = this.diffusionMultiplier(norm, rayon.position);
         rayon.ombrerCouleur(diffusion);
 
-        if (ombre(rayon, objetPlusProche)) {
+        if (estALOmbre(rayon, objetPlusProche)) {
             // Ombre conventionnelle
             rayon.ombrerCouleur(0);
         } else if (objetPlusProche.specular != 0) {
@@ -303,24 +305,24 @@ public class Scene {
         rayon.ajouterAmbiant(Main.AMBIANT, objetPlusProche.couleur);
     }
 
+    /**
+     * Fonction qui réfléchit le rayon incident contre un objet
+     * 
+     * @param rayon           Le rayon en question
+     * @param objetPlusProche L'objet le plus proche
+     */
     public void reflechir(Rayon rayon, Element objetPlusProche) {
         Vector3D norm = objetPlusProche.normale(rayon.position);
 
+        // Réflexion du rayon par rapport à la normale
         Vector3D reflechi = rayon.reflexion(norm);
-        // reflechi.normer(DISTANCE_MIN);
 
         // L'origine du rayon est maintenant le point de réflexion
         rayon.origine = new Vector3D(rayon.position);
 
-        // On réfléchit le rayon par rapport à la normale (loi de Descartes)
-        // rayon.position = rayon.position.reflexion(norm);
+        // La nouvelle position est le rayon réfléchi + l'origine du rayon
         rayon.position = reflechi;
-
-        // On replace le rayon là où on était
         rayon.position.ajouter(rayon.origine);
-
-        // On le fait avancer pour ne pas rester au contact de l'objet
-        rayon.avancer(DISTANCE_MIN);
     }
 
     /**
@@ -372,6 +374,7 @@ public class Scene {
             ombragePhong(rayon, objetPlusProche);
         }
 
+        // On renvoie la couleur du rayon
         return rayon.couleur;
     }
 

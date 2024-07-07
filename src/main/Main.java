@@ -4,9 +4,7 @@ import scene.Scene;
 import scene.Vector3D;
 
 import java.awt.Color;
-// import java.awt.Color;
 import java.awt.Graphics;
-// import java.awt.Graphics2D;
 import java.util.stream.IntStream;
 
 import javax.swing.JFrame;
@@ -16,13 +14,14 @@ public class Main extends JPanel {
     // Paramètres de la caméra
     public static final double OUVERTURE_X = Math.PI / 2; // Angle horizontal
     public static final double OUVERTURE_Z = Math.PI / 4; // Angle vertical
+    public static final double ZOOM = 0.5; // Niveau de zoom
 
     public static final double INCLINAISON = 0;// - Math.PI / 6; // Inclinaison verticale de la caméra
     public static final double ORIENTATION = 0;// - Math.PI;// Orientation horizontale de la caméra
     public static final Vector3D ORIGINE = new Vector3D(0, 0, 0); // Origine de la caméra
 
     // Taille de l'affichage
-    public static final int ECHELLE = 500; // Largeur de la fenêtre
+    public static final int ECHELLE = 1500; // Largeur de la fenêtre
     public static final int ESPACEMENT = 1; // Nombre de pixels par rayon
 
     public static final double RATIO = OUVERTURE_Z / OUVERTURE_X; // LARGEUR/HAUTEUR
@@ -34,8 +33,7 @@ public class Main extends JPanel {
     public static final int NOMBRE_REFLETS = 10; // Le nombre max de reflets
 
     public static Scene scene = new Scene(); // La scène à afficher
-    public static Color[] couleurs = new Color[X_SIZE * Z_SIZE];
-    public static Color[] couleurs2 = new Color[X_SIZE * Z_SIZE];
+    public static Color[] couleurs = new Color[X_SIZE * Z_SIZE]; // Le tableau de couleurs
 
     static class MyJFrame extends JFrame {
         // Pour une raison que j'ignore, la fonction paint tourne deux fois. Je ne fais
@@ -44,6 +42,8 @@ public class Main extends JPanel {
 
         /**
          * Algorithme d'affichage de la scène
+         * 
+         * @param g Le tableau d'affichage
          */
         public void paint(Graphics g) {
             // Boucle en parallèle pour l'affichage de la scène
@@ -73,12 +73,22 @@ public class Main extends JPanel {
     }
 
     public static void main(String[] args) throws InterruptedException {
+        // Création de la fenêtre
         MyJFrame frame = new MyJFrame();
 
-        frame.setTitle("Univers");
+        // Titre de la fenêtre
+        frame.setTitle("Scène");
+
+        // Sortir du programme en fermant la fenêtre
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Position de la fenêtre
         frame.setLocationRelativeTo(null);
+
+        // Taille de la fenêtre
         frame.setSize(X_SIZE * ESPACEMENT, Z_SIZE * ESPACEMENT + 36);
+
+        // Visibilité de la fenêtre
         frame.setVisible(true);
     }
 }

@@ -8,30 +8,24 @@ import scene.Vector3D;
  * Classe qui régit le comportement d'un parallélépipède rectangle
  */
 public class Boite extends Element {
-    /**
-     * Largeur du côté selon l'axe x
-     */
+    /** Largeur du côté selon l'axe x */
     private double x;
 
-    /**
-     * Largeur du côté selon l'axe y
-     */
+    /** Largeur du côté selon l'axe y */
     private double y;
 
-    /**
-     * Largeur du côté selon l'axe z
-     */
+    /** Largeur du côté selon l'axe z */
     private double z;
 
     /**
      * Constructeur qui spawn une boite (parallélépipède rectangle) en position
      * souhaitée
      * 
-     * @param position La position du centre de la boite
-     * @param couleur  La couleur de la boite
-     * @param x        La largeur
-     * @param y        La longueur
-     * @param z        La hauteur
+     * @param position  La position du centre de la boite
+     * @param couleur   La couleur de la boite
+     * @param x         La largeur
+     * @param y         La longueur
+     * @param z         La hauteur
      * @param reflexion Un booléen définissant si la surface est réflexive
      */
     public Boite(Vector3D position, Color couleur, double x, double y, double z, boolean reflexion) {
@@ -40,6 +34,7 @@ public class Boite extends Element {
         this.y = y;
         this.z = z;
         this.reflexion = reflexion;
+        this.specular = 0;
     }
 
     @Override

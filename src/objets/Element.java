@@ -54,7 +54,7 @@ public abstract class Element {
                 (SDF(new Vector3D(p.x + EPSILON, p.y, p.z)) - SDF(new Vector3D(p.x - EPSILON, p.y, p.z))),
                 (SDF(new Vector3D(p.x, p.y + EPSILON, p.z)) - SDF(new Vector3D(p.x, p.y - EPSILON, p.z))),
                 (SDF(new Vector3D(p.x, p.y, p.z + EPSILON)) - SDF(new Vector3D(p.x, p.y, p.z - EPSILON))));
-        norm.normaliserEnPlace();
+        norm.normaliser();
         return norm;
     }
 
